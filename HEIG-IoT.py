@@ -1,12 +1,19 @@
-from flask import Flask
+from flask import *
+import pprint
 
 app = Flask(__name__)
 
+pp = pprint.PrettyPrinter(indent=4)
 
-@app.route('/')
+
+@app.route('/', methods=['POST'])
 def hello_world():
-    return 'Hello World!'
+    data = request.get_json()
+    if data is None:
+        return "This is None"
+    else:
+        return pp.pformat(data)
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
