@@ -40,7 +40,7 @@ Return the mean parking time of a/each car for the specified period.
 - **from**			*int* (timestamp UTC Unix)
 - **to**			*int* (timestamp UTC Unix)
 
-##/api/parktime/<id>
+##/api/parktime/\<id\>
 Get the mean parking time for a certain car, if specified, or for each car otherwise for a certain period.
 Return the mean parking time of a/each car for the specified period.
 
@@ -57,7 +57,7 @@ Return the inputs and outputs of a/each car for the specified period.
 - **from**			*int* (timestamp UTC Unix)
 - **to**			*int* (timestamp UTC Unix)
 
-##/api/inout/<id>
+##/api/inout/\<id\>
 Get the inputs and outputs for a certain car, if specified, or for each car otherwise for a certain period.
 Return the inputs and outputs of a/each car for the specified period.
 
