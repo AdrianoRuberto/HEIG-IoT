@@ -28,25 +28,22 @@ def event():
         return pp.pformat(data)
 
 
-@app.route('/api/stat', methods=['GET', 'POST'])
+@app.route('/api/stat', methods=['GET'])
 def stat():
-    if request.method == "POST":
-        data = request.get_json()
-        if data is None:
-            return answer("Data are not JSON!", 400)
+    data = request.get_json()
+    if data is None:
+        return answer("Data are not JSON!", 400)
 
-        print("Received data!\n" + pp.pformat(data))
-        if not all(key in data for key in ("granularity", "from", "to")):
-            return answer("Not all key are there! Abort...", 400)
-        if not data['granularity'] in granularities:
-            return answer("Granularity is not a valid value! Abort....", 400)
-        if not isinstance(data['from'], int):
-            return answer("From is not numeric!", 400)
-        if not isinstance(data['to'], int):
-            return answer("To is not numeric!", 400)
-        return answer("All data are well formated! Processing data...")
-    else:
-        return answer("This is a GET")
+    print("Received data!\n" + pp.pformat(data))
+    if not all(key in data for key in ("granularity", "from", "to")):
+        return answer("Not all key are there! Abort...", 400)
+    if not data['granularity'] in granularities:
+        return answer("Granularity is not a valid value! Abort....", 400)
+    if not isinstance(data['from'], int):
+        return answer("From is not numeric!", 400)
+    if not isinstance(data['to'], int):
+        return answer("To is not numeric!", 400)
+    return answer("All data are well formated! Processing data...")
 
 
 if __name__ == '__main__':
