@@ -56,26 +56,20 @@ def stat():
 
 @app.route('/api/parktime', methods=['GET'])
 def parktime():
-    x = 1
-
-
-@app.route("/api/occupation", methods=["GET"])
-def occupation():
     data = request.args
 
     print("Received data!\n" + pp.pformat(data))
-
-    if not all(key in data for key in ("parking", "time")):
+    if not all(key in data for key in ("id", "from", "to", "parking")):
         return answer("Not all key are there! Abort...", 400)
-
-    if not is_int(data["parking"]):
-        return answer("Parking is not numeric!")
-
-    if not is_int(data["time"]):
-        return answer("Time is not numeric!")
-
-    return answer("All data are well formatted! Processing data...")
-
+    if not data['granularity'] in granularities:
+        return answer("Granularity is not a valid value! Abort....", 400)
+    if not is_int(data['parking']):
+        return answer("Parking is not numeric!", 400)
+    if not is_int(data['from']):
+        return answer("From is not numeric!", 400)
+    if not is_int(data['to']):
+        return answer("To is not numeric!", 400)
+    return answer("All data are well formated! Processing data...")
 
 if __name__ == '__main__':
     app.run(debug=True)
