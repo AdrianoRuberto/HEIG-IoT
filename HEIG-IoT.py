@@ -14,6 +14,7 @@ def answer(message, status=200):
         print(message + "\nStatus: " + str(status))
     return make_response(message, status)
 
+
 def is_int(i):
     try:
         int(i)
@@ -52,9 +53,28 @@ def stat():
         return answer("To is not numeric!", 400)
     return answer("All data are well formated! Processing data...")
 
+
 @app.route('/api/parktime', methods=['GET'])
 def parktime():
-    x=1
+    x = 1
+
+
+@app.route("/api/occupation", methods=["GET"])
+def occupation():
+    data = request.args
+
+    print("Received data!\n" + pp.pformat(data))
+
+    if not all(key in data for key in ("parking", "time")):
+        return answer("Not all key are there! Abort...", 400)
+
+    if not is_int(data["parking"]):
+        return answer("Parking is not numeric!")
+
+    if not is_int(data["time"]):
+        return answer("Time is not numeric!")
+
+    return answer("All data are well formatted! Processing data...")
 
 
 if __name__ == '__main__':
