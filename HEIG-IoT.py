@@ -14,6 +14,13 @@ def answer(message, status=200):
         print(message + "\nStatus: " + str(status))
     return make_response(message, status)
 
+def is_int(i):
+    try:
+        int(i)
+        return True
+    except ValueError:
+        return False
+
 
 @app.route('/api/event', methods=['POST'])
 def event():
@@ -30,20 +37,24 @@ def event():
 
 @app.route('/api/stat', methods=['GET'])
 def stat():
-    data = request.get_json()
-    if data is None:
-        return answer("Data are not JSON!", 400)
+    data = request.args
 
     print("Received data!\n" + pp.pformat(data))
-    if not all(key in data for key in ("granularity", "from", "to")):
+    if not all(key in data for key in ("granularity", "from", "to", "parking")):
         return answer("Not all key are there! Abort...", 400)
     if not data['granularity'] in granularities:
         return answer("Granularity is not a valid value! Abort....", 400)
-    if not isinstance(data['from'], int):
+    if not is_int(data['parking']):
+        return answer("Parking is not numeric!", 400)
+    if not is_int(data['from']):
         return answer("From is not numeric!", 400)
-    if not isinstance(data['to'], int):
+    if not is_int(data['to']):
         return answer("To is not numeric!", 400)
     return answer("All data are well formated! Processing data...")
+
+@app.route('/api/parktime', methods=['GET'])
+def parktime():
+    x=1
 
 
 if __name__ == '__main__':
