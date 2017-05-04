@@ -16,7 +16,7 @@ A car entering (in) or leaving (out) the car park.
 - **type**			*enum (in / out)*
 - **id**			*string* (uniq ID of the vehicle)
 
-##/api/stats
+##/api/stat
 Get the dataset for the specified period, with the specified granularity.  
 Returns how many vehicles are present in the car park for each sample.
 
@@ -61,7 +61,7 @@ Return the inputs and outputs of a/each car for the specified period.
 		"id" : "acksbvakzsbvuasbvivrsvnavn"
 	}
 
-####/api/stats:
+####/api/stat:
 
 	{
 		"parking" : 1
