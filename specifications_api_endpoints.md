@@ -1,8 +1,8 @@
 #Specifications API endpoints
 
 ##Endpoints
-- **/api/event** (unified datas from sensors via Pi)
-- **/api/stats** (datas for frontend)
+- **/api/event** (unified data from sensors via Pi)
+- **/api/stats** (data for frontend)
 - **/api/occupation** (occupation in live)
 - **/api/parktime** (time of car parking)
 - **/api/inout** (Number of car entering or leaving the car park)
@@ -15,7 +15,7 @@ A car entering (in) or leaving (out) the car park.
 - **timestamp**		*int* (timestamp UTC Unix)
 - **device**		*enum (mlx / wifi / flir)* (device type)
 - **type**			*enum (in / out)*
-- **id**			*string* [optional] (uniq ID of the vehicle)
+- **id**			*string* [optional] (unique ID of the vehicle)
 
 ##/api/stat
 Get the dataset for the specified period, with the specified granularity.  
@@ -49,7 +49,7 @@ Return the mean parking time of a/each car for the specified period.
 - **granularity**	*enum (year / month / day / hour)*
 - **from**			*int* (timestamp UTC Unix)
 - **to**			*int* (timestamp UTC Unix)
-- **id**			*string* (uniq ID of the vehicle)
+- **id**			*string* (unique ID of the vehicle)
 
 ##/api/inout/\<id\>
 Get the inputs and outputs for a certain car, if specified, or for each car otherwise for a certain period.
@@ -59,7 +59,7 @@ Return the inputs and outputs of a/each car for the specified period.
 - **granularity**	*enum (year / month / day / hour)*
 - **from**			*int* (timestamp UTC Unix)
 - **to**			*int* (timestamp UTC Unix)
-- **id**			*string* (uniq ID of the vehicle)
+- **id**			*string* (unique ID of the vehicle)
 
 
 ###Usage:
