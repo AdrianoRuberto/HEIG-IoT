@@ -1,4 +1,4 @@
-import logging
+#import logging
 from flask import *
 import pprint
 
@@ -12,12 +12,14 @@ granularities = ["year", "month", "day", "hour"]
 def answer(message, status=200):
     if app.debug:
         print(message + "\nStatus: " + str(status))
+
     return make_response(message, status)
 
 
 def is_int(i):
     try:
         int(i)
+
         return True
     except ValueError:
         return False
@@ -41,17 +43,41 @@ def stat():
     data = request.args
 
     print("Received data!\n" + pp.pformat(data))
+
     if not all(key in data for key in ("granularity", "from", "to", "parking")):
         return answer("Not all key are there! Abort...", 400)
+
     if not data['granularity'] in granularities:
         return answer("Granularity is not a valid value! Abort....", 400)
+
     if not is_int(data['parking']):
         return answer("Parking is not numeric!", 400)
+
     if not is_int(data['from']):
         return answer("From is not numeric!", 400)
+
     if not is_int(data['to']):
         return answer("To is not numeric!", 400)
-    return answer("All data are well formated! Processing data...")
+
+    return answer("All data are well formatted! Processing data...")
+
+
+@app.route('/api/occupation', methods=['GET'])
+def occupation():
+    data = request.args
+
+    print("Received data!\n" + pp.pformat(data))
+
+    if not all(key in data for key in ("parking", "time")):
+        return answer("Not all key are there! Abort...", 400)
+
+    if not is_int(data['parking']):
+        return answer("Parking is not numeric!", 400)
+
+    if not is_int(data['time']):
+        return answer("Time is not numeric!", 400)
+
+    return answer("All data are well formatted! Processing data...")
 
 
 @app.route('/api/parktime', methods=['GET'], defaults={'id': None})
@@ -60,18 +86,23 @@ def parktime(id):
     data = request.args
 
     print("Received data!\n" + pp.pformat(data))
+
     if not all(key in data for key in ("from", "to", "parking")):
         return answer("Not all key are there! Abort...", 400)
+
     if not is_int(data['parking']):
         return answer("Parking is not numeric!", 400)
+
     if not is_int(data['from']):
         return answer("From is not numeric!", 400)
+
     if not is_int(data['to']):
         return answer("To is not numeric!", 400)
-    if id is None or id == "":
-        return answer("ID is not here, getting for all vehicule!", 400)
 
-    return answer("All data are well formated! Processing data for vehicule " + id + "...")
+    if id is None or id == "":
+        return answer("ID is not here, getting for all vehicles!", 400)
+
+    return answer("All data are well formatted! Processing data for vehicle " + id + "...")
 
 
 @app.route('/api/inout', methods=['GET'], defaults={'id': None})
@@ -80,18 +111,24 @@ def inout(id):
     data = request.args
 
     print("Received data!\n" + pp.pformat(data))
+
     if not all(key in data for key in ("from", "to", "parking")):
         return answer("Not all key are there! Abort...", 400)
+
     if not is_int(data['parking']):
         return answer("Parking is not numeric!", 400)
+
     if not is_int(data['from']):
         return answer("From is not numeric!", 400)
+
     if not is_int(data['to']):
         return answer("To is not numeric!", 400)
-    if id is None or id == "":
-        return answer("ID is not here, getting for all vehicule!", 400)
 
-    return answer("All data are well formated! Processing data for vehicule " + id + "...")
+    if id is None or id == "":
+        return answer("ID is not here, getting for all vehicle!", 400)
+
+    return answer("All data are well formatted! Processing data for vehicle " + id + "...")
+
 
 if __name__ == '__main__':
     app.run(debug=True)
