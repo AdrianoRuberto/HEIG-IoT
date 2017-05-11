@@ -1,8 +1,13 @@
 #import logging
 from flask import *
 import pprint
+from flask_cassandra import CassandraCluster
 
 app = Flask(__name__)
+cassandra = CassandraCluster()
+
+# /!\ A REMPLACER AVEC LES BONNES VALEURS /!\
+app.config['CASSANDRA_NODES'] = ['cassandra-c1.terbiumlabs.com']
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -24,6 +29,13 @@ def is_int(i):
     except ValueError:
         return False
 
+@app.route("/cassandra_test")
+def cassandra_test():
+    session = cassandra.connect()
+    session.set_keyspace("monty_python")
+    cql = "SELECT * FROM sketches LIMIT 1"
+    r = session.execute(cql)
+    return str(r[0])
 
 @app.route('/api/event', methods=['POST'])
 def event():
