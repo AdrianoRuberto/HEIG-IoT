@@ -13,12 +13,13 @@ A car entering (in) or leaving (out) the car park.
 
 - **parking**		*int*
 - **timestamp**		*int* (timestamp UTC Unix)
+- **device**		*enum (mlx / wifi / flir)* (device type)
 - **type**			*enum (in / out)*
-- **id**			*string* (uniq ID of the vehicle)
+- **id**			*string* [optional] (uniq ID of the vehicle)
 
 ##/api/stat
 Get the dataset for the specified period, with the specified granularity.  
-Returns how many vehicles are present in the car park for each sample.
+Returns how many vehicles are present in the car park for each sample (mean).
 
 - **parking**		*int*
 - **granularity**	*enum (year / month / day / hour)*
@@ -32,9 +33,9 @@ Returns how many vehicles are in the car park at a specific time.
 - **parking**		*int*
 - **time**			*int* (timestamp UTC Unix)
 
-##/api/parktime
-Get the mean parking time for a certain car, if specified, or for each car otherwise for a certain period.  
-Return the mean parking time of a/each car for the specified period.
+##/api/vehicule
+Get the list of vehicules that was present during the specified period.  
+Return a list of vehicules.
 
 - **parking**		*int*
 - **from**			*int* (timestamp UTC Unix)
@@ -45,23 +46,17 @@ Get the mean parking time for a certain car, if specified, or for each car other
 Return the mean parking time of a/each car for the specified period.
 
 - **parking**		*int*
+- **granularity**	*enum (year / month / day / hour)*
 - **from**			*int* (timestamp UTC Unix)
 - **to**			*int* (timestamp UTC Unix)
 - **id**			*string* (uniq ID of the vehicle)
-
-##/api/inout
-Get the inputs and outputs for a certain car, if specified, or for each car otherwise for a certain period.  
-Return the inputs and outputs of a/each car for the specified period.
-
-- **parking**		*int*
-- **from**			*int* (timestamp UTC Unix)
-- **to**			*int* (timestamp UTC Unix)
 
 ##/api/inout/\<id\>
 Get the inputs and outputs for a certain car, if specified, or for each car otherwise for a certain period.
 Return the inputs and outputs of a/each car for the specified period.
 
 - **parking**		*int*
+- **granularity**	*enum (year / month / day / hour)*
 - **from**			*int* (timestamp UTC Unix)
 - **to**			*int* (timestamp UTC Unix)
 - **id**			*string* (uniq ID of the vehicle)
@@ -73,6 +68,7 @@ Return the inputs and outputs of a/each car for the specified period.
 	{
 		"parking" : 1
 		"timestamp" : 1234567890
+		"device" : "mlx"
 		"type" : "in"
 		"id" : "acksbvakzsbvuasbvivrsvnavn"
 	}
