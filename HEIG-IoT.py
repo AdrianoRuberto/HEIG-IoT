@@ -31,6 +31,7 @@ def is_int(i):
     except ValueError:
         return False
 
+
 @app.route("/cassandra_test")
 def cassandra_test():
     session = cassandra.connect()
@@ -38,6 +39,7 @@ def cassandra_test():
     cql = "SELECT * FROM sketches LIMIT 1"
     r = session.execute(cql)
     return str(r[0])
+
 
 @app.route("/api/event", methods=["POST"])
 def event():
