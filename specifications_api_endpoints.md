@@ -63,45 +63,95 @@ Return the inputs and outputs of a/each car for the specified period.
 
 
 ###Usage:
-####/api/event:
+####/api/event: (request)
 
 	{
-		"parking" : 1
-		"timestamp" : 1234567890
-		"device" : "mlx"
-		"type" : "in"
-		"id" : "acksbvakzsbvuasbvivrsvnavn"
+		"parking" : 1,
+		"timestamp" : 1234567890,
+		"device" : "mlx",
+		"type" : "in",
+		"id" : "1f1a4ea7c9e0d6ca"
 	}
 
-####/api/stat:
+####/api/stat: (response)
 
 	{
-		"parking" : 1
-		"granularity" : "day"
-		"from" : 1234567890
-		"to" : 2234567890
+		[
+			{
+				"from" : 1234567000,
+				"vehicule" : 105
+			},
+			{
+				"from" : 1234568000,
+				"vehicule" : 138
+			},
+			{
+				"from" : 1234569000,
+				"vehicule" : 147
+			},
+			{
+				"from" : 1234570000,
+				"vehicule" : 151
+			},
+			{
+				"from" : 1234571000,
+				"vehicule" : 169
+			},
+			{
+				"from" : 1234572000,
+				"vehicule" : 173
+			},
+			{
+				"from" : 1234573000,
+				"vehicule" : 180
+			}
+		]
 	}
 
-####/api/occupation:
+####/api/occupation: (response)
 
 	{
-		"parking" : 1
-		"time" : 1234567890
+		"timestamp" : 1234567890,
+		"vehicule" : 146
 	}
 
-####/api/parktime:
+####/api/parktime/1f1a4ea7c9e0d6ca: (response)
 
 	{
-		"parking" : 1
-		"from" : 1234567890
-		"to" : 2234567890
-		"id" : "acksbvakzsbvuasbvivrsvnavn"
+		[
+			{
+				"from" : 1234567000,
+				"mean" : 0000007658
+			},
+			{
+				"from" : 1234568000,
+				"mean" : 0000007658
+			},
+			{
+				"from" : 1234569000,
+				"mean" : 0000007658
+			}
+		]
 	}
 
-####/api/inout:
+####/api/inout/1f1a4ea7c9e0d6ca: (response)
 
 	{
-		"parking" : 1
-		"from" : 1234567890
-		"to" : 2234567890
+		[
+			{
+				"from" : 1234567000,
+				"in" : 20,
+				"out" : 20
+			},
+			{
+				"from" : 1234568000,
+				"in" : 10,
+				"out" : 10
+			},
+			{
+				"from" : 1234569000,
+				"in" : 13,
+				"out" : 12
+			}
+		]
 	}
