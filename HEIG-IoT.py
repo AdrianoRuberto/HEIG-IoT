@@ -1,5 +1,6 @@
 from flask import *
 import pprint
+import json
 from flask_cassandra import CassandraCluster
 
 app = Flask(__name__)
@@ -85,7 +86,24 @@ def stat():
     if not is_int(data["to"]):
         return answer("To is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    return answer("All data are well formatted! Processing data...")
+
+    r = cassandra_req("SELECT ts, cars_count FROM park_stat WHERE ts >= " + str(data["from"]) + " AND ts <= " + str(data["to"]))
+
+    if data["granularity"] = "day":
+        r = processDay(r)   # 6h-18h
+
+    if data["granularity"] = "month":
+        r = processDay(r)   # 6h-18h
+        r = processMonth(r) # 30 days
+
+    if data["granularity"] == "year":
+        r = processDay(r)   # 6h-18h
+        r = processYear(r)  # 365 days
+
+    stats = json.dumps(r, sort_keys=True, separators=(',', ': '))
+
+    return answer(stats)
+    #return answer("All data are well formatted! Processing data...")
 
 
 @app.route("/api/occupation", methods=["GET"])
@@ -103,7 +121,6 @@ def occupation():
     r = cassandra_req("SELECT occ FROM park_occupation WHERE pid = " + str(data["parking"]))
 
     return answer('{"vehicule" : ' + str(r[0]) + '}')
-    # return answer("All data are well formatted! Processing data...")
 
 
 @app.route("/api/vehicule", methods=["GET"])
