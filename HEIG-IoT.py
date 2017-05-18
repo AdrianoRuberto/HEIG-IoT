@@ -35,9 +35,9 @@ def is_int(i):
 
 def cassandra_req(req):
     session = cassandra.connect()
-    session.set_keyspace("monty_python")
+    session.set_keyspace("data")
     r = session.execute(req)
-    return str(r[0])
+    return r
 
 
 @app.route("/api/event", methods=["POST"])
@@ -94,16 +94,16 @@ def occupation():
 
     print("Received data!\n" + pp.pformat(data))
 
-    if not all(key in data for key in ("parking", "time")):
+    if not all(key in data for key in ("parking")):
         return answer("Not all key are there! Abort...", HTTP_BAD_REQUEST_STATUS_CODE)
 
     if not is_int(data["parking"]):
         return answer("Parking is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    if not is_int(data["time"]):
-        return answer("Time is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
+    r = cassandra_req("SELECT occ FROM park_occupation WHERE pid = " + str(data["parking"]))
 
-    return answer("All data are well formatted! Processing data...")
+    return answer('{"vehicule" : ' + str(r[0]) + '}')
+    # return answer("All data are well formatted! Processing data...")
 
 
 @app.route("/api/vehicule", methods=["GET"])
