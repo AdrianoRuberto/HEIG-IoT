@@ -1,11 +1,10 @@
-# requires keyspace input_data to exist
-
-create keyspace data
+create keyspace if not exists data
 with replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 
-use input_data;
+use data;
 
 create table events (
+    event_id uuid primary key,
     parking int,
     timestamp timestamp,
     device ascii,
