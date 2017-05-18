@@ -15,7 +15,7 @@ create table events (
 );
 
 create table park_stat_delta (
-    paking int,
+    parking int,
     timestamp timestamp,
     delta int,
     primary key(parking, timestamp)

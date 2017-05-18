@@ -31,7 +31,6 @@ Get the occupation of the car park in live.
 Returns how many vehicles are in the car park at a specific time.
 
 - **parking**		*int*
-- **time**			*int* (timestamp UTC Unix)
 
 ##/api/vehicule
 Get the list of vehicules that was present during the specified period.  
@@ -111,7 +110,6 @@ Return the inputs and outputs of a/each car for the specified period.
 ####/api/occupation: (response)
 
 	{
-		"timestamp" : 1234567890,
 		"vehicule" : 146
 	}
 
