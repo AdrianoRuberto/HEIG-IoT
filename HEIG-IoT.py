@@ -1,7 +1,8 @@
 from flask import *
+from flask_cassandra import CassandraCluster
 import pprint
 import json
-from flask_cassandra import CassandraCluster
+from processing import *
 
 app = Flask(__name__)
 cassandra = CassandraCluster()
@@ -90,15 +91,15 @@ def stat():
     r = cassandra_req("SELECT ts, cars_count FROM park_stat WHERE ts >= " + str(data["from"]) + " AND ts <= " + str(data["to"]))
 
     if data["granularity"] = "day":
-        r = processDay(r)   # 6h-18h
+        r = process_day(r)   # 6h-18h
 
     if data["granularity"] = "month":
-        r = processDay(r)   # 6h-18h
-        r = processMonth(r) # 30 days
+        r = process_day(r)   # 6h-18h
+        r = process_month(r) # 30 days
 
     if data["granularity"] == "year":
-        r = processDay(r)   # 6h-18h
-        r = processYear(r)  # 365 days
+        r = process_day(r)   # 6h-18h
+        r = process_year(r)  # 365 days
 
     stats = json.dumps(r, sort_keys=True, separators=(',', ': '))
 
