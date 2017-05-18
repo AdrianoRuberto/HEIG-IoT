@@ -14,10 +14,11 @@ HTTP_BAD_REQUEST_STATUS_CODE = 400
 
 granularities = ["year", "month", "day", "hour"]
 types = ["in", "out"]
+devices = ["mlx", "wifi", "flir"]
 
 
 def answer(message, status=200):
-    #if app.debug:
+    # if app.debug:
     #    print(message + "\nStatus: " + str(status))
 
     return make_response(message, status)
@@ -47,11 +48,8 @@ def event():
 
     print("Received data!\n" + pp.pformat(data))
 
-    if not all(key in data for key in ("parking", "timestamp", "type", "id")):
+    if not all(key in data for key in ("parking", "timestamp", "device", "type", "id")):
         return answer("Not all key are there! Abort...", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    if not data["type"] in types:
-        return answer("Type is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
 
     if not is_int(data["parking"]):
         return answer("Parking is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
@@ -59,23 +57,29 @@ def event():
     if not is_int(data["timestamp"]):
         return answer("Timestamp is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
+    if not data["device"] in devices:
+        return answer("Device is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
+
+    if not data["type"] in types:
+        return answer("Type is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
+
     return answer("All data are well formatted! Processing data...")
 
 
 @app.route("/api/stat", methods=["GET"])
 def stat():
-    data = request.args
+    data = request.get_json()
 
     print("Received data!\n" + pp.pformat(data))
 
-    if not all(key in data for key in ("granularity", "from", "to", "parking")):
+    if not all(key in data for key in ("parking", "granularity", "from", "to")):
         return answer("Not all key are there! Abort...", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    if not data["granularity"] in granularities:
-        return answer("Granularity is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
 
     if not is_int(data["parking"]):
         return answer("Parking is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
+
+    if not data["granularity"] in granularities:
+        return answer("Granularity is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
 
     if not is_int(data["from"]):
         return answer("From is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
@@ -88,7 +92,7 @@ def stat():
 
 @app.route("/api/occupation", methods=["GET"])
 def occupation():
-    data = request.args
+    data = request.get_json()
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -104,18 +108,42 @@ def occupation():
     return answer("All data are well formatted! Processing data...")
 
 
-@app.route("/api/parktime", methods=["GET"], defaults={"id": None})
-@app.route("/api/parktime/<id>", methods=["GET"])
-def parktime(id):
-    data = request.args
+@app.route("/api/vehicule", methods=["GET"])
+def vehicule():
+    data = request.get_json()
 
     print("Received data!\n" + pp.pformat(data))
 
-    if not all(key in data for key in ("from", "to", "parking")):
+    if not all(key in data for key in ("parking", "from", "to")):
         return answer("Not all key are there! Abort...", HTTP_BAD_REQUEST_STATUS_CODE)
 
     if not is_int(data["parking"]):
         return answer("Parking is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
+
+    if not is_int(data["from"]):
+        return answer("from is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
+
+    if not is_int(data["to"]):
+        return answer("to is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
+
+    return answer("All data are well formatted! Processing data...")
+
+
+@app.route("/api/parktime", methods=["GET"], defaults={"id": None})
+@app.route("/api/parktime/<id>", methods=["GET"])
+def parktime(id):
+    data = request.get_json()
+
+    print("Received data!\n" + pp.pformat(data))
+
+    if not all(key in data for key in ("parking", "granularity", "from", "to")):
+        return answer("Not all key are there! Abort...", HTTP_BAD_REQUEST_STATUS_CODE)
+
+    if not is_int(data["parking"]):
+        return answer("Parking is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
+
+    if not data["granularity"] in granularities:
+        return answer("Granularity is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
 
     if not is_int(data["from"]):
         return answer("From is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
@@ -132,15 +160,18 @@ def parktime(id):
 @app.route("/api/inout", methods=["GET"], defaults={"id": None})
 @app.route("/api/inout/<id>", methods=["GET"])
 def inout(id):
-    data = request.args
+    data = request.get_json()
 
     print("Received data!\n" + pp.pformat(data))
 
-    if not all(key in data for key in ("from", "to", "parking")):
+    if not all(key in data for key in ("parking", "granularity", "from", "to")):
         return answer("Not all key are there! Abort...", HTTP_BAD_REQUEST_STATUS_CODE)
 
     if not is_int(data["parking"]):
         return answer("Parking is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
+
+    if not data["granularity"] in granularities:
+        return answer("Granularity is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
 
     if not is_int(data["from"]):
         return answer("From is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
