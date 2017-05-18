@@ -33,12 +33,10 @@ def is_int(i):
         return False
 
 
-@app.route("/cassandra_test")
-def cassandra_test():
+def cassandra_req(req):
     session = cassandra.connect()
     session.set_keyspace("monty_python")
-    cql = "SELECT * FROM sketches LIMIT 1"
-    r = session.execute(cql)
+    r = session.execute(req)
     return str(r[0])
 
 
