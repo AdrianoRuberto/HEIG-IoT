@@ -11,5 +11,5 @@ create table events (
     device ascii,
     type ascii,
     vehicle_id ascii,
-    extra map<string, string>
+    extra map<ascii, ascii>
 );
