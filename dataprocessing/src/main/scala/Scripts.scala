@@ -26,7 +26,7 @@ object Scripts extends App {
 
 		events.map(_.getInt("parking")).foreach { parking =>
 			val rows = events.where("timestamp >= ? AND timestamp <= ?", from, to)
-			val toSave = (from to to)
+			val toSave = from.to(to, 3600)
 					.map(computeDelta(_, parking, rows))
 					.map { case (timestamp, delta) => (parking, timestamp, delta) }
 					.toList
@@ -46,8 +46,8 @@ object Scripts extends App {
 	def computeDelta(h: Long, parking: Int, rows: CassandraTableScanRDD[CassandraRow]): (Long, Long) = {
 		val rowsToCompute = rows.where("timestamp >= ? AND timestamp < ? && parking = ?", h, h + 3600, parking)
 		val in = rowsToCompute.where("type = ?", "IN").count()
-		val out = rowsToCompute.where("type = ?", h, h + 1, "OUT").count()
-		floor(rowsToCompute.first().getLong("timestamp")) -> (in - out)
+		val out = rowsToCompute.where("type = ?", "OUT").count()
+		h -> (in - out)
 	}
 
 	/**
