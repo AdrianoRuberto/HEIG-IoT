@@ -68,7 +68,7 @@ def event():
 
 @app.route("/api/stat", methods=["GET"])
 def stat():
-    data = request.get_json()
+    data = request.args()
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -103,12 +103,11 @@ def stat():
     stats = json.dumps(r, sort_keys=True, separators=(',', ': '))
 
     return answer(stats)
-    # return answer("All data are well formatted! Processing data...")
 
 
 @app.route("/api/occupation", methods=["GET"])
 def occupation():
-    data = request.get_json()
+    data = request.args()
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -118,14 +117,14 @@ def occupation():
     if not is_int(data["parking"]):
         return answer("Parking is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    r = cassandra_req("SELECT occ FROM park_occupation WHERE pid = " + str(data["parking"]))
+    r = cassandra_req("SELECT occ FROM park_occupation WHERE parking = " + str(data["parking"]))
 
     return answer('{"vehicule" : ' + str(r[0]) + '}')
 
 
 @app.route("/api/vehicule", methods=["GET"])
 def vehicule():
-    data = request.get_json()
+    data = request.args()
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -147,7 +146,7 @@ def vehicule():
 @app.route("/api/parktime", methods=["GET"], defaults={"id": None})
 @app.route("/api/parktime/<id>", methods=["GET"])
 def parktime(id):
-    data = request.get_json()
+    data = request.args()
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -175,7 +174,7 @@ def parktime(id):
 @app.route("/api/inout", methods=["GET"], defaults={"id": None})
 @app.route("/api/inout/<id>", methods=["GET"])
 def inout(id):
-    data = request.get_json()
+    data = request.args()
 
     print("Received data!\n" + pp.pformat(data))
 
