@@ -41,8 +41,8 @@ Return a list of vehicules.
 - **to**			*int* (timestamp UTC Unix)
 
 ##/api/parktime/\<id\>
-Get the mean parking time for a certain car, if specified, or for each car otherwise for a certain period.
-Return the mean parking time of a/each car for the specified period.
+Get the mean parking time for a certain car otherwise for a certain period.
+Return the mean parking time of a car for the specified period.
 
 - **parking**		*int*
 - **granularity**	*enum (year / month / day / hour)*
@@ -51,8 +51,8 @@ Return the mean parking time of a/each car for the specified period.
 - **id**			*string* (unique ID of the vehicle)
 
 ##/api/inout/\<id\>
-Get the inputs and outputs for a certain car, if specified, or for each car otherwise for a certain period.
-Return the inputs and outputs of a/each car for the specified period.
+Get the inputs and outputs for a certain car for a certain period.
+Return the inputs and outputs of a car for the specified period.
 
 - **parking**		*int*
 - **granularity**	*enum (year / month / day / hour)*
