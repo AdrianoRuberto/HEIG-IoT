@@ -68,7 +68,7 @@ def event():
 
 @app.route("/api/stat", methods=["GET"])
 def stat():
-    data = request.args()
+    data = request.args
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -107,7 +107,7 @@ def stat():
 
 @app.route("/api/occupation", methods=["GET"])
 def occupation():
-    data = request.args()
+    data = request.args
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -124,7 +124,7 @@ def occupation():
 
 @app.route("/api/vehicule", methods=["GET"])
 def vehicule():
-    data = request.args()
+    data = request.args
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -146,7 +146,7 @@ def vehicule():
 @app.route("/api/parktime", methods=["GET"], defaults={"id": None})
 @app.route("/api/parktime/<id>", methods=["GET"])
 def parktime(id):
-    data = request.args()
+    data = request.args
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -168,13 +168,20 @@ def parktime(id):
     if id is None or id == "":
         return answer("ID is not here, getting for all vehicles!", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    return answer("All data are well formatted! Processing data for vehicle " + id + "...")
+    r = cassandra_req("SELECT timestamp, type FROM events WHERE vehicle_id = " + str(data["id"]) + "parking = " + str(data["parking"]) + "timestamp >= " + str(data["from"]) + " AND timestamp <= " + str(data["to"]))
+
+    r = process_vehicle(r, data["granularity"])
+
+    park = json.dumps(r, sort_keys=True, separators=(',', ': '))
+
+    return answer(park)
+    # return answer("All data are well formatted! Processing data for vehicle " + id + "...")
 
 
 @app.route("/api/inout", methods=["GET"], defaults={"id": None})
 @app.route("/api/inout/<id>", methods=["GET"])
 def inout(id):
-    data = request.args()
+    data = request.args
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -196,7 +203,13 @@ def inout(id):
     if id is None or id == "":
         return answer("ID is not here, getting for all vehicle!", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    return answer("All data are well formatted! Processing data for vehicle " + id + "...")
+    r = cassandra_req("SELECT timestamp, type FROM events WHERE vehicle_id = " + str(data["id"]) + "parking = " + str(data["parking"]) + "timestamp >= " + str(data["from"]) + " AND timestamp <= " + str(data["to"]))
+
+    r = process_inout(r, data["granularity"])
+
+    inout = json.dumps(r, sort_keys=True, separators=(',', ': '))
+
+    return answer(inout)
 
 
 if __name__ == "__main__":
