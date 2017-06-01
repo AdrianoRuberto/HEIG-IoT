@@ -15,7 +15,7 @@ object Scripts extends App {
 
 	val sc = new SparkContext("spark://192.168.123.10:7077", "test", conf)
 
-	case class ParkStatDelta(parking: Int, timestamp: Long, delta: Long)
+	def table(name: String): CassandraTableScanRDD[CassandraRow] = sc.cassandraTable(keyspaceName, name)
 
 	/**
 	  * Compute the delta for from to to, exclusive to.
@@ -23,17 +23,36 @@ object Scripts extends App {
 	  * @param from The timestamp for the beginning
 	  * @param to   The timestamp for the end
 	  */
-	def computeDelta(from: Long, to: Long): Unit = {
-		val events: CassandraTableScanRDD[CassandraRow] = sc.cassandraTable(keyspaceName, "events")
+	def computeDelta(from: Long, to: Long, step: Long = 3600): Unit = {
+		case class ParkStatDelta(parking: Int, timestamp: Long, delta: Int)
+		val events = table("events")
 		val rows = events.where("timestamp >= ? AND timestamp <= ?", from, to)
 
-		events.map(_.getInt("parking")).foreach { parking =>
-			val toSave = from.to(to, 3600)
+		events.map(_.getInt("parking")).foreach(parking => {
+			val toSave = from.to(to, step)
 					.map(computeDelta(_, parking, rows))
-					.map { case (timestamp, delta) => ParkStatDelta(parking, timestamp, delta) }
+					.map { case (timestamp, delta) => ParkStatDelta(parking, timestamp, delta.toInt) }
 					.toList
 			sc.parallelize(toSave).saveToCassandra(keyspaceName, "park_stat_delta", SomeColumns("parking", "timestamp", "delta"))
-		}
+		})
+	}
+
+	/**
+	  * Resolve the delta for the given hour.
+	  *
+	  * @param hour the hour
+	  */
+	def resolveDelta(hour: Long): Unit = {
+		case class ParkStat(parking: Int, timestamp: Long, count: Int)
+		val statDeltas = table("park_stat_delta").where("timestamp >= ? AND timestamp <= ?", hour - 3600, hour)
+		val stats = table("park_stat")
+
+		statDeltas.map(_.getInt("parking")).foreach(parking => {
+			val before = stats.where("timestamp = ? AND parking = ?", hour - 3600, parking).first.getInt("count")
+			val current = before + statDeltas.where("parking = ?", parking).first.getInt("delta")
+			sc.parallelize(List(ParkStat(parking, hour, current)))
+					.saveToCassandra(keyspaceName, "park_stat", SomeColumns("parking", "timestamp", "count"))
+		})
 	}
 
 	/**
