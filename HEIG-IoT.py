@@ -20,8 +20,8 @@ devices = ["mlx", "wifi", "flir"]
 
 
 def answer(message, status=200):
-    # if app.debug:
-    #    print(message + "\nStatus: " + str(status))
+    if app.debug:
+       print(message + "\nStatus: " + str(status))
 
     return make_response(message, status)
 
@@ -169,10 +169,8 @@ def parktime(id):
         return answer("To is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
     if id is None or id == "":
-        return answer("ID is not here, getting for all vehicles!", HTTP_BAD_REQUEST_STATUS_CODE)
+        return answer("No vehicule ID!", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    r = cassandra_req("SELECT occ FROM park_occupation WHERE pid = " + str(data["parking"]))
-    
     return answer("All data are well formatted! Processing data for vehicle " + id + "...")
 
 
@@ -199,7 +197,7 @@ def inout(id):
         return answer("To is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
     if id is None or id == "":
-        return answer("ID is not here, getting for all vehicle!", HTTP_BAD_REQUEST_STATUS_CODE)
+        return answer("No vehicule ID!", HTTP_BAD_REQUEST_STATUS_CODE)
 
     return answer("All data are well formatted! Processing data for vehicle " + id + "...")
 
