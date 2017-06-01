@@ -1,19 +1,23 @@
 import org.apache.spark.{SparkConf, SparkContext}
 import com.datastax.spark.connector._
 import com.datastax.spark.connector.rdd.CassandraTableScanRDD
+import com.typesafe.config.ConfigFactory
 import java.util.{Calendar, Date}
 import org.apache.commons.lang.time.DateUtils //Loads implicit functions
 
 object Scripts extends App {
 
-	val keyspaceName = "data"
+	val cassandraConf = ConfigFactory.load("cassandra.conf")
+
+	val keyspaceName = cassandraConf.getString("spark.cassandra.keyspace_name")
 
 	val conf: SparkConf = new SparkConf(true)
-			.set("spark.cassandra.connection.host", "127.0.0.1:9042")
-			.set("spark.cassandra.auth.username", "cassandra")
-			.set("spark.cassandra.auth.password", "cassandra")
+			.set("spark.cassandra.connection.host", cassandraConf.getString("spark.cassandra.host"))
+			.set("spark.cassandra.auth.username", cassandraConf.getString("spark.cassandra.username"))
+			.set("spark.cassandra.auth.password", cassandraConf.getString("spark.cassandra.password"))
 
-	val sc = new SparkContext("spark://192.168.123.10:7077", "test", conf)
+	implicit val sc = new SparkContext("spark://" + cassandraConf.getString("spark.context.host"),
+		cassandraConf.getString("spark.context.appName"), conf)
 
 	def table(name: String): CassandraTableScanRDD[CassandraRow] = sc.cassandraTable(keyspaceName, name)
 
