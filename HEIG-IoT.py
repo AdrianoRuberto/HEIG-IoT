@@ -20,8 +20,8 @@ devices = ["mlx", "wifi", "flir"]
 
 
 def answer(message, status=200):
-    # if app.debug:
-    #    print(message + "\nStatus: " + str(status))
+    if app.debug:
+       print(message + "\nStatus: " + str(status))
 
     return make_response(message, status)
 
@@ -98,6 +98,7 @@ def stat():
 
     if data["granularity"] == "year":
         r = process_day(r)  # 6h-18h
+        r = process_month(r) # 30 days
         r = process_year(r)  # 365 days
 
     stats = json.dumps(r, sort_keys=True, separators=(',', ': '))
@@ -140,6 +141,8 @@ def vehicule():
     if not is_int(data["to"]):
         return answer("to is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
+    r = cassandra_req("SELECT vehicle_id FROM events WHERE parking = " + str(data["parking"]))
+
     return answer("All data are well formatted! Processing data...")
 
 
@@ -166,7 +169,7 @@ def parktime(id):
         return answer("To is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
     if id is None or id == "":
-        return answer("ID is not here, getting for all vehicles!", HTTP_BAD_REQUEST_STATUS_CODE)
+        return answer("No vehicule ID!", HTTP_BAD_REQUEST_STATUS_CODE)
 
     r = cassandra_req("SELECT timestamp, type FROM events WHERE vehicle_id = " + str(data["id"]) + "parking = " + str(data["parking"]) + "timestamp >= " + str(data["from"]) + " AND timestamp <= " + str(data["to"]))
 
@@ -201,7 +204,7 @@ def inout(id):
         return answer("To is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
     if id is None or id == "":
-        return answer("ID is not here, getting for all vehicle!", HTTP_BAD_REQUEST_STATUS_CODE)
+        return answer("No vehicule ID!", HTTP_BAD_REQUEST_STATUS_CODE)
 
     r = cassandra_req("SELECT timestamp, type FROM events WHERE vehicle_id = " + str(data["id"]) + "parking = " + str(data["parking"]) + "timestamp >= " + str(data["from"]) + " AND timestamp <= " + str(data["to"]))
 
