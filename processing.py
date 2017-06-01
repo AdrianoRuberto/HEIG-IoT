@@ -1,5 +1,5 @@
 def process_day(data):
-    hours = sorted(data)
+    hours = sorted(data)  # make lambda to filter on object->timestamp instead of object
 
     fulldays = [hours[x:x + 24] for x in range(0, len(hours), 24)]
     dayshours = []

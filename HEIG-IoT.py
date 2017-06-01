@@ -39,7 +39,7 @@ def cassandra_req(req):
     session = cassandra.connect()
     session.set_keyspace("data")
     r = session.execute(req)
-    return r
+    return list(r)
 
 
 @app.route("/api/event", methods=["POST"])
@@ -87,24 +87,23 @@ def stat():
     if not is_int(data["to"]):
         return answer("To is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
+    r = cassandra_req("SELECT timestamp, count FROM park_stat WHERE parking = " + str(data["parking"]) + "timestamp >= " + str(data["from"]) + " AND timestamp <= " + str(data["to"]))
 
-    r = cassandra_req("SELECT ts, cars_count FROM park_stat WHERE ts >= " + str(data["from"]) + " AND ts <= " + str(data["to"]))
+    if data["granularity"] == "day":
+        r = process_day(r)  # 6h-18h
 
-    if data["granularity"] = "day":
-        r = process_day(r)   # 6h-18h
-
-    if data["granularity"] = "month":
-        r = process_day(r)   # 6h-18h
-        r = process_month(r) # 30 days
+    if data["granularity"] == "month":
+        r = process_day(r)  # 6h-18h
+        r = process_month(r)  # 30 days
 
     if data["granularity"] == "year":
-        r = process_day(r)   # 6h-18h
+        r = process_day(r)  # 6h-18h
         r = process_year(r)  # 365 days
 
     stats = json.dumps(r, sort_keys=True, separators=(',', ': '))
 
     return answer(stats)
-    #return answer("All data are well formatted! Processing data...")
+    # return answer("All data are well formatted! Processing data...")
 
 
 @app.route("/api/occupation", methods=["GET"])
