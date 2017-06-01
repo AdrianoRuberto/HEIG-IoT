@@ -92,8 +92,12 @@ def stat():
     if data["granularity"] == "day":
         r = process_day(r)  # 6h-18h
 
-    if data["granularity"] == "day":
+    if data["granularity"] == "month":
+        r = process_day(r)  # 6h-18h
+        r = process_month(r)  # 30 days
 
+    if data["granularity"] == "year":
+        r = process_day(r)  # 6h-18h
         r = process_month(r) # 30 days
         r = process_year(r)  # 365 days
 
