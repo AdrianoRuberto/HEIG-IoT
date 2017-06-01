@@ -68,7 +68,7 @@ def event():
 
 @app.route("/api/stat", methods=["GET"])
 def stat():
-    data = request.args()
+    data = request.args
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -92,12 +92,9 @@ def stat():
     if data["granularity"] == "day":
         r = process_day(r)  # 6h-18h
 
-    if data["granularity"] == "month":
-        r = process_day(r)  # 6h-18h
-        r = process_month(r)  # 30 days
+    if data["granularity"] == "day":
 
-    if data["granularity"] == "year":
-        r = process_day(r)  # 6h-18h
+        r = process_month(r) # 30 days
         r = process_year(r)  # 365 days
 
     stats = json.dumps(r, sort_keys=True, separators=(',', ': '))
@@ -107,7 +104,7 @@ def stat():
 
 @app.route("/api/occupation", methods=["GET"])
 def occupation():
-    data = request.args()
+    data = request.args
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -124,7 +121,7 @@ def occupation():
 
 @app.route("/api/vehicule", methods=["GET"])
 def vehicule():
-    data = request.args()
+    data = request.args
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -140,13 +137,15 @@ def vehicule():
     if not is_int(data["to"]):
         return answer("to is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
+    r = cassandra_req("SELECT vehicle_id FROM events WHERE parking = " + str(data["parking"]))
+
     return answer("All data are well formatted! Processing data...")
 
 
 @app.route("/api/parktime", methods=["GET"], defaults={"id": None})
 @app.route("/api/parktime/<id>", methods=["GET"])
 def parktime(id):
-    data = request.args()
+    data = request.args
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -168,13 +167,15 @@ def parktime(id):
     if id is None or id == "":
         return answer("ID is not here, getting for all vehicles!", HTTP_BAD_REQUEST_STATUS_CODE)
 
+    r = cassandra_req("SELECT occ FROM park_occupation WHERE pid = " + str(data["parking"]))
+    
     return answer("All data are well formatted! Processing data for vehicle " + id + "...")
 
 
 @app.route("/api/inout", methods=["GET"], defaults={"id": None})
 @app.route("/api/inout/<id>", methods=["GET"])
 def inout(id):
-    data = request.args()
+    data = request.args
 
     print("Received data!\n" + pp.pformat(data))
 
