@@ -36,11 +36,28 @@ object Scripts extends App {
 
 		events.map(_.getInt("parking")).foreach(parking => {
 			val toSave = from.to(to, step)
-					.map(hour => hour -> computeDelta(hour, parking, rows))
+					.map(hour => hour -> computeDelta(hour, hour + step, parking, rows))
 					.map { case (timestamp, delta) => ParkStatDelta(parking, timestamp, delta.toInt) }
 					.toList
 			sc.parallelize(toSave).saveToCassandra(keyspaceName, "park_stat_delta", SomeColumns("parking", "timestamp", "delta"))
 		})
+	}
+
+	/**
+	  * Compute de delta from given timestamps and parking until the next step.
+	  * The delta is computed as the number of input minus the output.
+	  *
+	  * @param from    The timestamp for the beginning
+	  * @param to      The timestamp for the end
+	  * @param parking The parking
+	  * @param rows    The rows
+	  * @return
+	  */
+	def computeDelta(from: Long, to: Long, parking: Int, rows: CassandraTableScanRDD[CassandraRow]): Int = {
+		val rowsToCompute = rows.where("timestamp >= ? AND timestamp < ? && parking = ?", from, to, parking)
+		val in = rowsToCompute.where("type = ?", "IN").count()
+		val out = rowsToCompute.where("type = ?", "OUT").count()
+		(in - out).toInt
 	}
 
 	/**
@@ -58,22 +75,6 @@ object Scripts extends App {
 			sc.parallelize(List(ParkStat(parking, hour, current)))
 					.saveToCassandra(keyspaceName, "park_stat", SomeColumns("parking", "timestamp", "count"))
 		})
-	}
-
-	/**
-	  * Compute de delta from a given hour and parking.
-	  * The delta is computed as the number of input minus the output.
-	  *
-	  * @param h       The hour
-	  * @param parking The parking
-	  * @param rows    The rows
-	  * @return
-	  */
-	def computeDelta(h: Long, parking: Int, rows: CassandraTableScanRDD[CassandraRow]): Int = {
-		val rowsToCompute = rows.where("timestamp >= ? AND timestamp < ? && parking = ?", h, h + 3600, parking)
-		val in = rowsToCompute.where("type = ?", "IN").count()
-		val out = rowsToCompute.where("type = ?", "OUT").count()
-		(in - out).toInt
 	}
 
 	/**
