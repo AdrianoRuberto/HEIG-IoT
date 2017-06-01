@@ -21,6 +21,9 @@ object Scripts extends App {
 
 	def table(name: String): CassandraTableScanRDD[CassandraRow] = sc.cassandraTable(keyspaceName, name)
 
+	case class ParkStat(parking: Int, timestamp: Long, count: Int)
+	case class ParkStatDelta(parking: Int, timestamp: Long, delta: Int)
+
 	/**
 	  * Compute the delta for from to to, exclusive to.
 	  *
@@ -28,7 +31,6 @@ object Scripts extends App {
 	  * @param to   The timestamp for the end
 	  */
 	def computeDelta(from: Long, to: Long, step: Long = 3600): Unit = {
-		case class ParkStatDelta(parking: Int, timestamp: Long, delta: Int)
 		val events = table("events")
 		val rows = events.where("timestamp >= ? AND timestamp <= ?", from, to)
 
@@ -47,7 +49,6 @@ object Scripts extends App {
 	  * @param hour the hour
 	  */
 	def resolveDelta(hour: Long): Unit = {
-		case class ParkStat(parking: Int, timestamp: Long, count: Int)
 		val statDeltas = table("park_stat_delta").where("timestamp >= ? AND timestamp <= ?", hour - 3600, hour)
 		val stats = table("park_stat")
 
