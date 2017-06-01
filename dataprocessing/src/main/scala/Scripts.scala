@@ -15,6 +15,8 @@ object Scripts extends App {
 
 	val sc = new SparkContext("spark://192.168.123.10:7077", "test", conf)
 
+	case class ParkStatDelta(parking: Int, timestamp: Long, delta: Long)
+
 	/**
 	  * Compute the delta for from to to, exclusive to.
 	  *
@@ -28,7 +30,7 @@ object Scripts extends App {
 		events.map(_.getInt("parking")).foreach { parking =>
 			val toSave = from.to(to, 3600)
 					.map(computeDelta(_, parking, rows))
-					.map { case (timestamp, delta) => (parking, timestamp, delta) }
+					.map { case (timestamp, delta) => ParkStatDelta(parking, timestamp, delta) }
 					.toList
 			sc.parallelize(toSave).saveToCassandra(keyspaceName, "park_stat_delta", SomeColumns("parking", "timestamp", "delta"))
 		}
