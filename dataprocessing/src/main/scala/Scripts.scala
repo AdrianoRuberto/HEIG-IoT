@@ -30,7 +30,7 @@ object Scripts extends App {
 
 		events.map(_.getInt("parking")).foreach(parking => {
 			val toSave = from.to(to, step)
-					.map(computeDelta(_, parking, rows))
+					.map(hour => hour -> computeDelta(hour, parking, rows))
 					.map { case (timestamp, delta) => ParkStatDelta(parking, timestamp, delta.toInt) }
 					.toList
 			sc.parallelize(toSave).saveToCassandra(keyspaceName, "park_stat_delta", SomeColumns("parking", "timestamp", "delta"))
@@ -64,11 +64,11 @@ object Scripts extends App {
 	  * @param rows    The rows
 	  * @return
 	  */
-	def computeDelta(h: Long, parking: Int, rows: CassandraTableScanRDD[CassandraRow]): (Long, Long) = {
+	def computeDelta(h: Long, parking: Int, rows: CassandraTableScanRDD[CassandraRow]): Int = {
 		val rowsToCompute = rows.where("timestamp >= ? AND timestamp < ? && parking = ?", h, h + 3600, parking)
 		val in = rowsToCompute.where("type = ?", "IN").count()
 		val out = rowsToCompute.where("type = ?", "OUT").count()
-		h -> (in - out)
+		(in - out).toInt
 	}
 
 	/**
