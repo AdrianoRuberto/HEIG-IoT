@@ -23,9 +23,9 @@ object Scripts extends App {
 	  */
 	def computeDelta(from: Long, to: Long): Unit = {
 		val events: CassandraTableScanRDD[CassandraRow] = sc.cassandraTable(keyspaceName, "events")
+		val rows = events.where("timestamp >= ? AND timestamp <= ?", from, to)
 
 		events.map(_.getInt("parking")).foreach { parking =>
-			val rows = events.where("timestamp >= ? AND timestamp <= ?", from, to)
 			val toSave = from.to(to, 3600)
 					.map(computeDelta(_, parking, rows))
 					.map { case (timestamp, delta) => (parking, timestamp, delta) }
