@@ -3,15 +3,16 @@
 from cassandra.cluster import Cluster
 import random
 import uuid
+import time
 
 cluster = Cluster(['127.0.0.1'])
 session = cluster.connect('data')
 
 parking = 1
 device = 'flir'
-base_timestamp = 1495098976
-step_timestamp = 60
-num_events = 1000
+base_timestamp = int(time.time())
+step_timestamp = 30
+num_events = 10000
 
 print("Generating Events ...")
 for k in range(0, num_events):

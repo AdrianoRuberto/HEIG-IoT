@@ -7,7 +7,7 @@ import org.apache.commons.lang.time.DateUtils //Loads implicit functions
 
 object Scripts extends App {
 
-	val cassandraConf = ConfigFactory.load("cassandra.conf")
+	val cassandraConf = ConfigFactory.load("application.conf")
 
 	val keyspaceName = cassandraConf.getString("spark.cassandra.keyspace_name")
 
@@ -16,8 +16,10 @@ object Scripts extends App {
 			.set("spark.cassandra.auth.username", cassandraConf.getString("spark.cassandra.username"))
 			.set("spark.cassandra.auth.password", cassandraConf.getString("spark.cassandra.password"))
 
-	implicit val sc = new SparkContext("spark://" + cassandraConf.getString("spark.context.host"),
-		cassandraConf.getString("spark.context.appName"), conf)
+	// implicit val sc = new SparkContext("spark://" + cassandraConf.getString("spark.context.host"),
+	// 	cassandraConf.getString("spark.context.appName"), conf)
+
+	implicit val sc = new SparkContext(conf)
 
 	def table(name: String): CassandraTableScanRDD[CassandraRow] = sc.cassandraTable(keyspaceName, name)
 
