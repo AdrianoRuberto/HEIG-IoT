@@ -98,8 +98,6 @@ def stat():
 
     req = "SELECT timestamp, count FROM park_stat WHERE parking = " + str(data["parking"]) + " AND timestamp >= " + str(data["from"]) + " AND timestamp <= " + str(data["to"]) + ";"
 
-    print(req)
-
     r = cassandra_req(req)
 
     if data["granularity"] == "day":

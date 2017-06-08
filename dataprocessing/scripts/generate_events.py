@@ -11,14 +11,14 @@ parking = 1
 device = 'flir'
 base_timestamp = 1495098976
 step_timestamp = 60
-num_events = 100000
+num_events = 1000
 
 print("Generating Events ...")
 for k in range(0, num_events):
     if k > 0 and k % 1000 == 0:
         print("generated ", k)
     
-    timestamp = base_timestamp + step_timestamp * k
+    timestamp = (base_timestamp + step_timestamp * k) * 1000
     if random.randint(0, 1):
         direction = 'in'
     else:
