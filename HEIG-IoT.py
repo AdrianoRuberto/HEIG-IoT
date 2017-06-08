@@ -67,9 +67,9 @@ def event():
     if not data["type"] in types:
         return answer("Type is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    #req = "INSERT INTO events(\"event_id\", \"parking\", \"timestamp\", \"device\", \"type\", \"vehicle_id\") VALUES (uuid()," + str(data["parking"]) + "," + str(data["timestamp"]) + "," + "\'" + data["device"] + "\'" + "," + "\'" + data["type"] + "\'" + "," + "\'" + data["id"] + "\');"
+    req = "INSERT INTO events(\"event_id\", \"parking\", \"timestamp\", \"device\", \"type\", \"vehicle_id\") VALUES (uuid()," + str(data["parking"]) + "," + str(data["timestamp"]) + "," + "\'" + data["device"] + "\'" + "," + "\'" + data["type"] + "\'" + "," + "\'" + data["id"] + "\');"
 
-    #r = cassandra_req(req)
+    r = cassandra_req(req)
 
     return answer("All data are well formatted! Processing data...")
 
