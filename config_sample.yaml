@@ -1,1 +1,1 @@
-CASSANDRA_NODE = Your_node
+CASSANDRA_NODE: Your_node
