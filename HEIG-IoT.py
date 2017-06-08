@@ -3,12 +3,17 @@ from flask_cassandra import CassandraCluster
 import pprint
 import json
 from processing import *
+import yaml
 
 app = Flask(__name__)
 cassandra = CassandraCluster()
 
+configFile = "config.yaml"
+
 # /!\ A REMPLACER AVEC LES BONNES VALEURS /!\
-app.config['CASSANDRA_NODES'] = ['localhost']
+with open(configFile, 'r') as f:
+    docs = yaml.load(f)
+    app.config['CASSANDRA_NODES'] = docs
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -29,7 +34,6 @@ def answer(message, status=200):
 def is_int(i):
     try:
         int(i)
-
         return True
     except ValueError:
         return False
