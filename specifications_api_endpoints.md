@@ -12,7 +12,7 @@ Post a new event to the system.
 A car entering (in) or leaving (out) the car park.
 
 - **parking**		*int*
-- **timestamp**		*int* (timestamp UTC Unix)
+- **timestamp**		*int* (timestamp UTC Unix in ms)
 - **device**		*enum (mlx / wifi / flir)* (device type)
 - **type**			*enum (in / out)*
 - **id**			*string* [optional] (unique ID of the vehicle)

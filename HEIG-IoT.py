@@ -8,7 +8,7 @@ app = Flask(__name__)
 cassandra = CassandraCluster()
 
 # /!\ A REMPLACER AVEC LES BONNES VALEURS /!\
-app.config['CASSANDRA_NODES'] = ['cassandra-c1.terbiumlabs.com']
+app.config['CASSANDRA_NODES'] = ['localhost']
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -62,6 +62,10 @@ def event():
 
     if not data["type"] in types:
         return answer("Type is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
+
+    req = "INSERT INTO events(\"event_id\", \"parking\", \"timestamp\", \"device\", \"type\", \"vehicle_id\") VALUES (uuid()," + str(data["parking"]) + "," + str(data["timestamp"]) + "," + "\'" + data["device"] + "\'" + "," + "\'" + data["type"] + "\'" + "," + "\'" + data["id"] + "\');"
+
+    r = cassandra_req(req)
 
     return answer("All data are well formatted! Processing data...")
 
@@ -173,7 +177,7 @@ def parktime(id):
 
     r = cassandra_req("SELECT timestamp, type FROM events WHERE vehicle_id = " + str(data["id"]) + "parking = " + str(data["parking"]) + "timestamp >= " + str(data["from"]) + " AND timestamp <= " + str(data["to"]))
 
-    r = process_vehicle(r, data["granularity"])
+    #r = process_vehicle(r, data["granularity"])
 
     park = json.dumps(r, sort_keys=True, separators=(',', ': '))
 
