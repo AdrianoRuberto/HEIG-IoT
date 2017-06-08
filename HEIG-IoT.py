@@ -65,7 +65,7 @@ def event():
 
     req = "INSERT INTO events(\"event_id\", \"parking\", \"timestamp\", \"device\", \"type\", \"vehicle_id\") VALUES (uuid()," + str(data["parking"]) + "," + str(data["timestamp"]) + "," + "\'" + data["device"] + "\'" + "," + "\'" + data["type"] + "\'" + "," + "\'" + data["id"] + "\');"
 
-    r = cassandra_req(req)
+    cassandra_req(req)
 
     return answer("All data are well formatted! Processing data...")
 
