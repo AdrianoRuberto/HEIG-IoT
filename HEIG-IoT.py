@@ -1,7 +1,5 @@
 from flask import *
 from flask_cassandra import CassandraCluster
-import pprint
-import json
 from processing import *
 import yaml
 
@@ -14,8 +12,6 @@ configFile = "config.yaml"
 with open(configFile, 'r') as f:
     docs = yaml.load(f)
     app.config['CASSANDRA_NODES'] = docs['CASSANDRA_NODE']
-
-pp = pprint.PrettyPrinter(indent=4)
 
 HTTP_BAD_REQUEST_STATUS_CODE = 400
 
