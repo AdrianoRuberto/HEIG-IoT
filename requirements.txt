@@ -1,0 +1,4 @@
+flask
+flask_cassandra
+pyYaml
+pprint
