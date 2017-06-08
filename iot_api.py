@@ -228,6 +228,10 @@ def inout(id):
 
     return answer(inout)
 
+@app.route("/", methods=["GET"])
+def root():
+    return answer("OK") 
+
 
 if __name__ == "__main__":
     app.run(debug=True)
