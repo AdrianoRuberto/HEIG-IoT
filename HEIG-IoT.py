@@ -13,7 +13,7 @@ configFile = "config.yaml"
 # /!\ A REMPLACER AVEC LES BONNES VALEURS /!\
 with open(configFile, 'r') as f:
     docs = yaml.load(f)
-    app.config['CASSANDRA_NODES'] = docs
+    app.config['CASSANDRA_NODES'] = docs['CASSANDRA_NODE']
 
 pp = pprint.PrettyPrinter(indent=4)
 
