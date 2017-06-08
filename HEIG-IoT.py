@@ -77,6 +77,7 @@ def event():
 @app.route("/api/stat", methods=["GET"])
 def stat():
     data = request.args
+    data = dict((k, v.lower() if isinstance(v, str) else v) for k, v in data.items())
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -121,23 +122,25 @@ def stat():
 @app.route("/api/occupation", methods=["GET"])
 def occupation():
     data = request.args
+    data = dict((k, v.lower() if isinstance(v, str) else v) for k, v in data.items())
 
     print("Received data!\n" + pp.pformat(data))
 
-    if not all(key in data for key in ("parking")):
+    if not all(key in data for key in ["parking"]):
         return answer("Not all key are there! Abort...", HTTP_BAD_REQUEST_STATUS_CODE)
 
     if not is_int(data["parking"]):
         return answer("Parking is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    r = cassandra_req("SELECT occ FROM park_occupation WHERE parking = " + str(data["parking"]))
+    r = cassandra_req("SELECT occupation FROM park_occupation WHERE parking = " + str(data["parking"]) + ";")
 
-    return answer('{"vehicule" : ' + str(r[0]) + '}')
+    return answer('{"vehicule" : ' + str(len(r)) + '}')
 
 
 @app.route("/api/vehicule", methods=["GET"])
 def vehicule():
     data = request.args
+    data = dict((k, v.lower() if isinstance(v, str) else v) for k, v in data.items())
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -153,7 +156,7 @@ def vehicule():
     if not is_int(data["to"]):
         return answer("to is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    r = cassandra_req("SELECT vehicle_id FROM events WHERE parking = " + str(data["parking"]))
+    r = cassandra_req("SELECT vehicle_id FROM events WHERE parking = " + str(data["parking"]) + " allow filtering;")
 
     return answer("All data are well formatted! Processing data...")
 
@@ -162,6 +165,7 @@ def vehicule():
 @app.route("/api/parktime/<id>", methods=["GET"])
 def parktime(id):
     data = request.args
+    data = dict((k, v.lower() if isinstance(v, str) else v) for k, v in data.items())
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -183,20 +187,20 @@ def parktime(id):
     if id is None or id == "":
         return answer("No vehicule ID!", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    r = cassandra_req("SELECT timestamp, type FROM events WHERE vehicle_id = " + str(data["id"]) + "parking = " + str(data["parking"]) + "timestamp >= " + str(data["from"]) + " AND timestamp <= " + str(data["to"]))
+    r = cassandra_req("SELECT timestamp, type FROM events WHERE vehicle_id = " + str(data["id"]) + "parking = " + str(data["parking"]) + "timestamp >= " + str(data["from"]) + " AND timestamp <= " + str(data["to"]) + ";")
 
     #r = process_vehicle(r, data["granularity"])
 
     park = json.dumps(r, sort_keys=True, separators=(',', ': '))
 
     return answer(park)
-    # return answer("All data are well formatted! Processing data for vehicle " + id + "...")
 
 
 @app.route("/api/inout", methods=["GET"], defaults={"id": None})
 @app.route("/api/inout/<id>", methods=["GET"])
 def inout(id):
     data = request.args
+    data = dict((k, v.lower() if isinstance(v, str) else v) for k, v in data.items())
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -218,7 +222,7 @@ def inout(id):
     if id is None or id == "":
         return answer("No vehicule ID!", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    r = cassandra_req("SELECT timestamp, type FROM events WHERE vehicle_id = " + str(data["id"]) + "parking = " + str(data["parking"]) + "timestamp >= " + str(data["from"]) + " AND timestamp <= " + str(data["to"]))
+    r = cassandra_req("SELECT timestamp, type FROM events WHERE vehicle_id = " + str(data["id"]) + "parking = " + str(data["parking"]) + "timestamp >= " + str(data["from"]) + " AND timestamp <= " + str(data["to"]) + ";")
 
     r = process_inout(r, data["granularity"])
 
