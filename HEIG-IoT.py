@@ -1,10 +1,13 @@
 from flask import *
 from flask_cassandra import CassandraCluster
 from processing import *
+import pprint
 import yaml
 
 app = Flask(__name__)
 cassandra = CassandraCluster()
+
+pp = pprint.PrettyPrinter(indent=4)
 
 configFile = "config.yaml"
 
@@ -45,6 +48,7 @@ def cassandra_req(req):
 @app.route("/api/event", methods=["POST"])
 def event():
     data = request.get_json()
+    data = dict((k, v.lower() if isinstance(v, str) else v) for k, v in data.items())
 
     print("Received data!\n" + pp.pformat(data))
 
@@ -63,9 +67,9 @@ def event():
     if not data["type"] in types:
         return answer("Type is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    req = "INSERT INTO events(\"event_id\", \"parking\", \"timestamp\", \"device\", \"type\", \"vehicle_id\") VALUES (uuid()," + str(data["parking"]) + "," + str(data["timestamp"]) + "," + "\'" + data["device"] + "\'" + "," + "\'" + data["type"] + "\'" + "," + "\'" + data["id"] + "\');"
+    #req = "INSERT INTO events(\"event_id\", \"parking\", \"timestamp\", \"device\", \"type\", \"vehicle_id\") VALUES (uuid()," + str(data["parking"]) + "," + str(data["timestamp"]) + "," + "\'" + data["device"] + "\'" + "," + "\'" + data["type"] + "\'" + "," + "\'" + data["id"] + "\');"
 
-    r = cassandra_req(req)
+    #r = cassandra_req(req)
 
     return answer("All data are well formatted! Processing data...")
 
