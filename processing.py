@@ -83,14 +83,14 @@ def process_year(days):
 
     return years
 
+if __name__ == "__main__":
+    # Tests
+    r = range(600 * 24)
+    dstat = process_day(r)
+    print(dstat)
 
-# Tests
-r = range(600 * 24)
-dstat = process_day(r)
-print(dstat)
+    mstat = process_month(dstat)
+    print(mstat)
 
-mstat = process_month(dstat)
-print(mstat)
-
-ystat = process_year(dstat)
-print(ystat)
+    ystat = process_year(dstat)
+    print(ystat)

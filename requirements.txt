@@ -1,4 +1,4 @@
 flask
-flask_cassandra
 pyYaml
 pprint
+elasticsearch==5.4.0

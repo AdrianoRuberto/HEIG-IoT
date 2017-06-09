@@ -1,11 +1,11 @@
 from flask import *
-from flask_cassandra import CassandraCluster
 from processing import *
+from iot_data import IotData
 import pprint
 import yaml
+import json
 
 app = Flask(__name__)
-cassandra = CassandraCluster()
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -14,20 +14,19 @@ configFile = "config.yaml"
 # /!\ A REMPLACER AVEC LES BONNES VALEURS /!\
 with open(configFile, 'r') as f:
     docs = yaml.load(f)
-    app.config['CASSANDRA_NODES'] = docs['CASSANDRA_NODE']
+    datastore = IotData(docs['ELASTICSEARCH_NODE'])
 
 HTTP_BAD_REQUEST_STATUS_CODE = 400
 
 granularities = ["year", "month", "day", "hour"]
 types = ["in", "out"]
-devices = ["mlx", "wifi", "flir"]
+devices = ["mlx", "wifi", "flir", "other"]
 
 
 def answer(message, status=200):
-    if app.debug:
-       print(message + "\nStatus: " + str(status))
-
-    return make_response(message, status)
+    resp = make_response(json.dumps(message), status)
+    resp.mimetype="application/json"
+    return resp
 
 
 def is_int(i):
@@ -38,40 +37,32 @@ def is_int(i):
         return False
 
 
-def cassandra_req(req):
-    session = cassandra.connect()
-    session.set_keyspace("data")
-    r = session.execute(req)
-    return list(r)
-
 
 @app.route("/api/event", methods=["POST"])
 def event():
     data = request.get_json()
     data = dict((k, v.lower() if isinstance(v, str) else v) for k, v in data.items())
-
-    print("Received data!\n" + pp.pformat(data))
-
-    if not all(key in data for key in ("parking", "timestamp", "device", "type", "id")):
-        return answer("Not all key are there! Abort...", HTTP_BAD_REQUEST_STATUS_CODE)
+    
+    if not all(key in data for key in ("parking", "timestamp", "device", "type")):
+        return answer({ "error": "Not all key are there! Abort..."}, HTTP_BAD_REQUEST_STATUS_CODE)
 
     if not is_int(data["parking"]):
-        return answer("Parking is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
+        return answer({ "error": "Parking is not numeric!"}, HTTP_BAD_REQUEST_STATUS_CODE)
 
     if not is_int(data["timestamp"]):
-        return answer("Timestamp is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
+        return answer({ "error": "Timestamp is not numeric!"}, HTTP_BAD_REQUEST_STATUS_CODE)
 
     if not data["device"] in devices:
-        return answer("Device is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
+        return answer({ "error": "Device is not a valid value! Abort...."}, HTTP_BAD_REQUEST_STATUS_CODE)
 
     if not data["type"] in types:
-        return answer("Type is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
+        return answer({ "error": "Type is not a valid value! Abort...."}, HTTP_BAD_REQUEST_STATUS_CODE)
 
-    req = "INSERT INTO events(\"event_id\", \"parking\", \"timestamp\", \"device\", \"type\", \"vehicle_id\") VALUES (uuid()," + str(data["parking"]) + "," + str(data["timestamp"]*1000) + "," + "\'" + data["device"] + "\'" + "," + "\'" + data["type"] + "\'" + "," + "\'" + data["id"] + "\');"
+    resp = datastore.add_event(data["parking"], data["timestamp"] * 1000, data["device"], data["type"])
 
-    r = cassandra_req(req)
-
-    return answer("All data are well formatted! Processing data...")
+    return answer({
+        "event_id": resp['_id']
+    })
 
 
 @app.route("/api/stat", methods=["GET"])
@@ -87,8 +78,8 @@ def stat():
     if not is_int(data["parking"]):
         return answer("Parking is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    if not data["granularity"] in granularities:
-        return answer("Granularity is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
+    # if not data["granularity"] in granularities:
+    #     return answer("Granularity is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
 
     if not is_int(data["from"]):
         return answer("From is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
@@ -96,25 +87,21 @@ def stat():
     if not is_int(data["to"]):
         return answer("To is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    req = "SELECT timestamp, count FROM park_stat WHERE parking = " + str(data["parking"]) + " AND timestamp >= " + str(data["from"]) + " AND timestamp <= " + str(data["to"]) + ";"
+    resp = datastore.get_stats(int(data["parking"]), int(data["from"]), int(data["to"]), data["granularity"])
 
-    r = cassandra_req(req)
+    if resp["timed_out"]:
+        return answer({ "error" : "Query timed out ..." }, 500)
 
-    if data["granularity"] == "day":
-        r = process_day(r)  # 6h-18h
+    stats = map(
+        lambda bucket: {
+            "time": bucket["key"] // 1000,
+            "delta": bucket["delta"]["value"],
+            "count": bucket["counter"]["value"]
+        },
+        resp["aggregations"]["by_interval"]["buckets"]
+    )
 
-    if data["granularity"] == "month":
-        r = process_day(r)  # 6h-18h
-        r = process_month(r)  # 30 days
-
-    if data["granularity"] == "year":
-        r = process_day(r)  # 6h-18h
-        r = process_month(r) # 30 days
-        r = process_year(r)  # 365 days
-
-    stats = json.dumps(r, sort_keys=True, separators=(',', ': '))
-
-    return answer(stats)
+    return answer(list(stats))
 
 
 @app.route("/api/occupation", methods=["GET"])
