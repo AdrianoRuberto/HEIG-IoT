@@ -4,6 +4,7 @@ from iot_data import IotData
 import pprint
 import yaml
 import json
+import re
 
 app = Flask(__name__)
 
@@ -18,7 +19,7 @@ with open(configFile, 'r') as f:
 
 HTTP_BAD_REQUEST_STATUS_CODE = 400
 
-granularities = ["year", "month", "day", "hour"]
+GRANULARITY_RE = re.compile('^(year|month|day|hour|(\d+(d|h|m)))$')
 types = ["in", "out"]
 devices = ["mlx", "wifi", "flir", "other"]
 
@@ -78,8 +79,8 @@ def stat():
     if not is_int(data["parking"]):
         return answer("Parking is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    # if not data["granularity"] in granularities:
-    #     return answer("Granularity is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
+    if not GRANULARITY_RE.match(data["granularity"]):
+        return answer("Granularity is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
 
     if not is_int(data["from"]):
         return answer("From is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
@@ -95,8 +96,7 @@ def stat():
     stats = map(
         lambda bucket: {
             "time": bucket["key"] // 1000,
-            "delta": bucket["delta"]["value"],
-            "count": bucket["counter"]["value"]
+            "count": int(bucket["avg_count"]["value"])
         },
         resp["aggregations"]["by_interval"]["buckets"]
     )
@@ -117,107 +117,29 @@ def occupation():
     if not is_int(data["parking"]):
         return answer("Parking is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
 
-    r = cassandra_req("SELECT occupation FROM park_occupation WHERE parking = " + str(data["parking"]) + ";")
+    count = datastore.get_count(int(data['parking']))
 
-    return answer('{"vehicule" : ' + str(len(r)) + '}')
+    return answer({ "count": count })
 
 
 @app.route("/api/vehicule", methods=["GET"])
 def vehicule():
-    data = request.args
-    data = dict((k, v.lower() if isinstance(v, str) else v) for k, v in data.items())
-
-    print("Received data!\n" + pp.pformat(data))
-
-    if not all(key in data for key in ("parking", "from", "to")):
-        return answer("Not all key are there! Abort...", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    if not is_int(data["parking"]):
-        return answer("Parking is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    if not is_int(data["from"]):
-        return answer("from is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    if not is_int(data["to"]):
-        return answer("to is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    r = cassandra_req("SELECT vehicle_id FROM events WHERE parking = " + str(data["parking"]) + " allow filtering;")
-
-    return answer("All data are well formatted! Processing data...")
-
+    return answer({ "error": "Endpoint not implemented." })
 
 @app.route("/api/parktime", methods=["GET"], defaults={"id": None})
 @app.route("/api/parktime/<id>", methods=["GET"])
 def parktime(id):
-    data = request.args
-    data = dict((k, v.lower() if isinstance(v, str) else v) for k, v in data.items())
-
-    print("Received data!\n" + pp.pformat(data))
-
-    if not all(key in data for key in ("parking", "granularity", "from", "to")):
-        return answer("Not all key are there! Abort...", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    if not is_int(data["parking"]):
-        return answer("Parking is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    if not data["granularity"] in granularities:
-        return answer("Granularity is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    if not is_int(data["from"]):
-        return answer("From is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    if not is_int(data["to"]):
-        return answer("To is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    if id is None or id == "":
-        return answer("No vehicule ID!", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    r = cassandra_req("SELECT timestamp, type FROM events WHERE vehicle_id = " + str(data["id"]) + "parking = " + str(data["parking"]) + "timestamp >= " + str(data["from"]) + " AND timestamp <= " + str(data["to"]) + ";")
-
-    #r = process_vehicle(r, data["granularity"])
-
-    park = json.dumps(r, sort_keys=True, separators=(',', ': '))
-
-    return answer(park)
+    return answer({ "error": "Endpoint not implemented." })
 
 
 @app.route("/api/inout", methods=["GET"], defaults={"id": None})
 @app.route("/api/inout/<id>", methods=["GET"])
 def inout(id):
-    data = request.args
-    data = dict((k, v.lower() if isinstance(v, str) else v) for k, v in data.items())
-
-    print("Received data!\n" + pp.pformat(data))
-
-    if not all(key in data for key in ("parking", "granularity", "from", "to")):
-        return answer("Not all key are there! Abort...", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    if not is_int(data["parking"]):
-        return answer("Parking is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    if not data["granularity"] in granularities:
-        return answer("Granularity is not a valid value! Abort....", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    if not is_int(data["from"]):
-        return answer("From is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    if not is_int(data["to"]):
-        return answer("To is not numeric!", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    if id is None or id == "":
-        return answer("No vehicule ID!", HTTP_BAD_REQUEST_STATUS_CODE)
-
-    r = cassandra_req("SELECT timestamp, type FROM events WHERE vehicle_id = " + str(data["id"]) + "parking = " + str(data["parking"]) + "timestamp >= " + str(data["from"]) + " AND timestamp <= " + str(data["to"]) + ";")
-
-    r = process_inout(r, data["granularity"])
-
-    inout = json.dumps(r, sort_keys=True, separators=(',', ': '))
-
-    return answer(inout)
+    return answer({ "error": "Endpoint not implemented." })
 
 @app.route("/", methods=["GET"])
 def root():
-    return answer("OK") 
+    return answer({ "ok": True }) 
 
 
 if __name__ == "__main__":
